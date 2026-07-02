@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>お世話ゲーム 最終アンケート</title>
+  <script src="./assets/pets/pet_silhouette_map.js"></script>
+  <style>
+    :root{
+      --bg:#fff8fb;
+      --card:#ffffff;
+      --ink:#4c4650;
+      --muted:#766f79;
+      --line:#f4d7e3;
+      --pink:#ff84b5;
+      --pink2:#f1549b;
+      --lav:#bd9cff;
+      --yellow:#fff0a8;
+      --green:#9ee6c9;
+      --shadow:0 18px 45px rgba(238, 111, 164, .16);
+      --radius:26px;
+      --max:920px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      color:var(--ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+      background:
+        radial-gradient(circle at 12% 8%, #ffe1ef 0 0, transparent 260px),
+        radial-gradient(circle at 88% 0%, #efe6ff 0 0, transparent 310px),
+        radial-gradient(circle at 80% 95%, #fff2b9 0 0, transparent 290px),
+        var(--bg);
+      line-height:1.75;
+    }
+    button,input,textarea,select{font:inherit}
+    .wrap{width:min(var(--max), calc(100% - 28px)); margin:0 auto; padding:28px 0 56px;}
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border:1px solid var(--line);
+      border-radius:34px;
+      background:rgba(255,255,255,.82);
+      box-shadow:var(--shadow);
+      padding:28px 24px;
+      margin-bottom:18px;
+    }
+    .hero:before,
+    .hero:after{
+      content:"";
+      position:absolute;
+      border-radius:999px;
+      opacity:.48;
+      pointer-events:none;
+    }
+    .hero:before{width:170px;height:170px;background:#ffe4f1;right:-44px;top:-54px;}
+    .hero:after{width:140px;height:140px;background:#f1e6ff;left:-50px;bottom:-64px;}
+    .hero-inner{position:relative;z-index:1;}
+    .eyebrow{font-size:13px;letter-spacing:.08em;color:var(--pink2);font-weight:800;margin-bottom:8px;}
+    h1{margin:0 0 12px;font-size:clamp(25px, 4vw, 40px);line-height:1.25;color:#dd4f91;letter-spacing:.03em;}
+    .lead{margin:0;color:var(--muted);font-size:15px;}
+    .card{
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:rgba(255,255,255,.9);
+      box-shadow:var(--shadow);
+      padding:22px;
+      margin:16px 0;
+    }
+    .stepbar{display:flex;gap:7px;margin:20px 0 0;}
+    .dot{height:8px;flex:1;border-radius:999px;background:#f6dbe7;overflow:hidden;}
+    .dot.active{background:linear-gradient(90deg,var(--pink),var(--lav));}
+    .section-title{margin:0 0 8px;font-size:21px;color:#d84e8d;}
+    .hint{margin:0 0 14px;color:var(--muted);font-size:14px;}
+    .notice{background:#fff9e2;border:1px solid #f5df9e;border-radius:18px;padding:13px 15px;color:#675a33;font-size:14px;}
+    .small{font-size:12px;color:var(--muted)}
+    .field{margin:14px 0;}
+    .label{display:block;font-weight:800;margin-bottom:7px;}
+    input[type="text"], textarea, select{
+      width:100%;
+      border:1px solid #efd6e0;
+      background:#fff;
+      color:var(--ink);
+      border-radius:16px;
+      padding:12px 14px;
+      outline:none;
+    }
+    input[type="text"]:focus, textarea:focus, select:focus{border-color:#eb7eb0;box-shadow:0 0 0 4px rgba(255,132,181,.16);}
+    textarea{min-height:120px;resize:vertical;}
+    .q{
+      padding:18px 0;
+      border-top:1px dashed #efd6e0;
+    }
+    .q:first-of-type{border-top:0;padding-top:0;}
+    .q-title{font-weight:850;margin-bottom:10px;}
+    .scale{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+    .scale input{position:absolute;opacity:0;pointer-events:none;}
+    .scale label{
+      display:flex;
+      min-height:47px;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      border:1px solid #efd6e0;
+      border-radius:15px;
+      background:#fff;
+      color:#6e6570;
+      font-weight:800;
+      cursor:pointer;
+      transition:.15s ease;
+      user-select:none;
+      font-size:14px;
+    }
+    .scale input:checked + label{
+      color:#fff;
+      border-color:transparent;
+      background:linear-gradient(90deg,var(--pink),var(--lav));
+      box-shadow:0 10px 22px rgba(232,84,151,.22);
+      transform:translateY(-1px);
+    }
+    .scale-word{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:12px;margin-top:6px;}
+    .buttons{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-top:18px;}
+    .btn{
+      appearance:none;
+      border:0;
+      border-radius:999px;
+      padding:13px 18px;
+      background:#f1e9ef;
+      color:#695f69;
+      cursor:pointer;
+      font-weight:900;
+      transition:.15s ease;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn.primary{color:#fff;background:linear-gradient(90deg,var(--pink2),var(--lav));box-shadow:0 12px 26px rgba(232,84,151,.26);}
+    .btn.ghost{background:transparent;border:1px solid #ecd4df;}
+    .btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+    .hidden{display:none !important;}
+    .result-grid{display:grid;grid-template-columns:270px 1fr;gap:22px;align-items:center;}
+    .partner-card{
+      min-height:280px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      border-radius:28px;
+      background:linear-gradient(160deg,#fff 0%,#fff4fa 55%,#f4ecff 100%);
+      border:1px solid #f1d7e2;
+      padding:18px;
+      position:relative;
+      overflow:hidden;
+    }
+    .partner-card:before{content:"";position:absolute;width:160px;height:160px;background:#fff0a8;border-radius:50%;right:-58px;bottom:-54px;opacity:.7;}
+    .pet-img{
+      width:170px;
+      height:170px;
+      object-fit:contain;
+      image-rendering:auto;
+      filter: drop-shadow(0 18px 18px rgba(123,79,113,.16));
+      position:relative;
+      z-index:1;
+    }
+    .partner-name{font-size:24px;font-weight:950;color:#d84e8d;margin-top:8px;position:relative;z-index:1;}
+    .partner-type{font-size:13px;color:#766f79;position:relative;z-index:1;}
+    .message{font-size:18px;font-weight:850;color:#5d5260;margin:0 0 7px;}
+    .bars{margin-top:14px;}
+    .bar-row{display:grid;grid-template-columns:128px 1fr 48px;gap:12px;align-items:center;margin:9px 0;}
+    .bar-label{font-size:13px;color:#5e5660;white-space:nowrap;}
+    .bar-track{height:13px;border:1px solid #f2d8e3;background:#fff;border-radius:999px;overflow:hidden;}
+    .bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--pink),var(--lav));width:0%;transition:width .5s ease;}
+    .bar-num{text-align:right;font-weight:850;color:#6a606b;font-size:13px;}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0;}
+    .chip{border-radius:999px;background:#fff1f8;border:1px solid #f0d1df;color:#c54783;padding:5px 10px;font-size:12px;font-weight:850;}
+    .complete-box{background:#f7fff9;border:1px solid #c9f0d8;color:#3b6b4c;border-radius:18px;padding:12px 14px;margin-top:14px;}
+    .error-box{background:#fff2f4;border:1px solid #f2bac8;color:#8a2f45;border-radius:18px;padding:12px 14px;margin-top:14px;}
+    .download-box{background:#f8f3ff;border:1px solid #dcc9ff;color:#59437d;border-radius:18px;padding:12px 14px;margin-top:14px;}
+    .list{margin:8px 0 0;padding-left:1.2em;color:#6d626d;}
+    .footer-note{text-align:center;margin-top:20px;color:#8a818a;font-size:12px;}
+    @media (max-width:760px){
+      .wrap{width:min(100% - 18px, var(--max));padding-top:10px;}
+      .hero{padding:23px 18px;border-radius:28px;}
+      .card{padding:18px;border-radius:22px;}
+      .scale{gap:6px;}
+      .scale label{min-height:44px;font-size:13px;border-radius:13px;}
+      .buttons{position:sticky;bottom:0;background:linear-gradient(180deg,rgba(255,248,251,0),rgba(255,248,251,.96) 18%);padding:18px 0 6px;margin-bottom:-6px;}
+      .result-grid{grid-template-columns:1fr;}
+      .partner-card{min-height:240px;}
+      .pet-img{width:150px;height:150px;}
+      .bar-row{grid-template-columns:112px 1fr 43px;gap:8px;}
+      .bar-label{font-size:12px;}
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="eyebrow">AFTER CARE SURVEY</div>
+        <h1>お世話ゲーム<br>最終アンケート</h1>
+        <p class="lead">これまでの関わりをふりかえりながら、相棒との感じ方について答えてください。正解やよい答えはありません。</p>
+        <div class="stepbar" aria-label="進み具合">
+          <div class="dot active" data-dot="0"></div>
+          <div class="dot" data-dot="1"></div>
+          <div class="dot" data-dot="2"></div>
+          <div class="dot" data-dot="3"></div>
+        </div>
+      </div>
+    </section>
+
+    <form id="surveyForm" novalidate>
+      <section class="card page" data-page="0">
+        <h2 class="section-title">はじめに</h2>
+        <p class="hint">研究用IDはゲームから自動で引き継がれる想定です。表示されていない場合だけ、画面に表示されたIDを入れてください。</p>
+        <div class="notice">回答は研究目的で集計されます。個人名や学校名は入力しないでください。</div>
+
+        <div class="field">
+          <label class="label" for="research_id">研究用ID</label>
+          <input id="research_id" name="research_id" type="text" autocomplete="off" placeholder="例：AUTO-1234" />
+        </div>
+
+        <div class="field">
+          <label class="label" for="free_note_before">今の相棒について、最初に浮かんだことがあれば書いてください</label>
+          <textarea id="free_note_before" name="free_note_before" placeholder="短くても大丈夫です。"></textarea>
+        </div>
+
+        <div class="buttons">
+          <span class="small">所要時間の目安：3〜5分</span>
+          <button type="button" class="btn primary" data-next>回答を始める</button>
+        </div>
+      </section>
+
+      <section class="card page hidden" data-page="1">
+        <h2 class="section-title">相棒は「同じ」だと感じましたか</h2>
+        <p class="hint">変化や再登場を思い出しながら、近いものを選んでください。</p>
+        <div id="identityQuestions"></div>
+        <div class="buttons">
+          <button type="button" class="btn ghost" data-prev>戻る</button>
+          <button type="button" class="btn primary" data-next>次へ</button>
+        </div>
+      </section>
+
+      <section class="card page hidden" data-page="2">
+        <h2 class="section-title">お世話のふりかえり</h2>
+        <p class="hint">あなた自身のお世話のしかたに近いものを選んでください。</p>
+        <div id="careQuestions"></div>
+        <div class="field">
+          <label class="label" for="free_note_after">相棒との関わりで印象に残っていること</label>
+          <textarea id="free_note_after" name="free_note_after" placeholder="例：思ったより気になった、変わったときに少しさみしかった、など"></textarea>
+        </div>
+        <div class="buttons">
+          <button type="button" class="btn ghost" data-prev>戻る</button>
+          <button type="button" class="btn primary" data-show-result>結果を見る</button>
+        </div>
+      </section>
+
+      <section class="card page hidden" data-page="3">
+        <h2 class="section-title">あなたに合いそうな相棒</h2>
+        <p class="hint">単一の相性パーセンテージではなく、お世話の傾向を8つのプロフィールとして表示します。</p>
+
+        <div class="result-grid">
+          <div class="partner-card">
+            <img id="petImage" class="pet-img" src="" alt="相棒のシルエット" />
+            <div id="petName" class="partner-name">相棒</div>
+            <div id="petType" class="partner-type">お世話タイプ</div>
+          </div>
+          <div>
+            <p id="resultMessage" class="message"></p>
+            <p id="resultSub" class="hint"></p>
+            <div id="resultChips" class="chips"></div>
+          </div>
+        </div>
+
+        <div class="bars" id="profileBars"></div>
+
+        <div class="notice" style="margin-top:16px;">ここに表示されるパーセンテージは、ゲームログとアンケート回答から作った8軸プロフィールの目安です。優劣や合否を表すものではありません。</div>
+
+        <div id="submitStatus"></div>
+
+        <div class="buttons">
+          <button type="button" class="btn ghost" data-prev>戻る</button>
+          <button type="submit" class="btn primary" id="submitBtn">回答を送信する</button>
+        </div>
+      </section>
+    </form>
+
+    <p class="footer-note">お世話ゲーム調査用アンケート v1.0</p>
+  </main>
+
+  <script>
+    const CONFIG = {
+      GAS_ENDPOINT: "",
+      APP_VERSION: "care-survey-public-v1.0.0"
+    };
+
+    const AXES = [
+      { key:"watch", label:"見守り度" },
+      { key:"quick", label:"反応の速さ" },
+      { key:"attach", label:"愛着度" },
+      { key:"regular", label:"規則性" },
+      { key:"observe", label:"観察度" },
+      { key:"social", label:"交流度" },
+      { key:"balance", label:"距離感バランス" },
+      { key:"continue", label:"継続・関係維持度" }
+    ];
+
+    const IDENTITY_QUESTIONS = [
+      { id:"id_same", text:"再登場した相棒は、前の相棒と同じ存在だと感じた。" },
+      { id:"id_name", text:"名前が同じなら、見た目が少し変わっても同じ相棒だと感じやすい。" },
+      { id:"id_body", text:"見た目が変わると、別の相棒のように感じやすい。", reverse:true },
+      { id:"id_mind", text:"性格や反応が続いていれば、同じ相棒だと感じやすい。" },
+      { id:"id_memory", text:"これまでの思い出や記憶の手がかりがあると、同じ相棒だと感じやすい。" },
+      { id:"id_relation", text:"自分が世話をしてきた時間があると、同じ相棒だと感じやすい。" },
+      { id:"id_gap", text:"変化があっても、もう一度関わってみたいと思った。" }
+    ];
+
+    const CARE_QUESTIONS = [
+      { id:"care_watch_1", axis:"watch", text:"すぐに何かをするより、まず様子を見てから関わることが多かった。" },
+      { id:"care_watch_2", axis:"watch", text:"相棒の状態をそっと見守る時間も大切だと感じた。" },
+      { id:"care_quick_1", axis:"quick", text:"相棒に変化があると、すぐに反応したくなった。" },
+      { id:"care_quick_2", axis:"quick", text:"通知や変化に気づいたら、早めにお世話した。" },
+      { id:"care_attach_1", axis:"attach", text:"ゲームを進めるうちに、相棒に愛着がわいた。" },
+      { id:"care_attach_2", axis:"attach", text:"相棒のことを、ただの画面上のものではなく少し特別に感じた。" },
+      { id:"care_regular_1", axis:"regular", text:"決まったタイミングでお世話することが多かった。" },
+      { id:"care_regular_2", axis:"regular", text:"できるだけ毎日続けようと意識した。" },
+      { id:"care_observe_1", axis:"observe", text:"相棒の表情や反応の小さな違いを見ようとした。" },
+      { id:"care_observe_2", axis:"observe", text:"何をすると相棒がどう変わるのかを確かめたくなった。" },
+      { id:"care_social_1", axis:"social", text:"相棒に話しかけるような気持ちで関わった。" },
+      { id:"care_social_2", axis:"social", text:"相棒とのやりとりを楽しんだ。" },
+      { id:"care_balance_1", axis:"balance", text:"世話をしすぎず、ちょうどよい距離を考えながら関わった。" },
+      { id:"care_balance_2", axis:"balance", text:"相棒の反応に合わせて、関わり方を変えた。" },
+      { id:"care_continue_1", axis:"continue", text:"明日も相棒の様子を見たいと思った。" },
+      { id:"care_continue_2", axis:"continue", text:"少し間があいても、また戻って関わりたいと思った。" }
+    ];
+
+    const PET_ARCHETYPES = [
+      { id:1, type:"そっと見守る水辺タイプ", msg:"小さな変化を静かに見つける関わり方が合いそうです。", tags:["観察","静かな愛着"], v:{watch:86,quick:42,attach:54,regular:66,observe:82,social:34,balance:78,continue:62}},
+      { id:2, type:"こまめに気づく水槽タイプ", msg:"毎日の小さなお世話を楽しめる相棒が合いそうです。", tags:["こまめ","継続"], v:{watch:70,quick:64,attach:68,regular:78,observe:74,social:42,balance:66,continue:76}},
+      { id:3, type:"反応を楽しむきらめきタイプ", msg:"反応の違いを見ながら距離を縮める関わり方が合いそうです。", tags:["反応","個性"], v:{watch:58,quick:78,attach:72,regular:58,observe:76,social:60,balance:55,continue:68}},
+      { id:4, type:"軽やか交流タイプ", msg:"テンポよく関わりながら、変化を楽しめる相棒が合いそうです。", tags:["交流","軽やか"], v:{watch:52,quick:82,attach:62,regular:62,observe:64,social:72,balance:54,continue:64}},
+      { id:5, type:"小さな変化発見タイプ", msg:"見逃しそうな変化に気づく観察力が活きそうです。", tags:["観察","ていねい"], v:{watch:82,quick:48,attach:56,regular:72,observe:88,social:36,balance:74,continue:66}},
+      { id:6, type:"ゆっくり歩幅タイプ", msg:"急がず、同じリズムで続けるお世話が合いそうです。", tags:["ゆっくり","安定"], v:{watch:88,quick:28,attach:60,regular:84,observe:70,social:30,balance:84,continue:72}},
+      { id:7, type:"距離感上手タイプ", msg:"近づきすぎず離れすぎず、ほどよい関係を作れそうです。", tags:["距離感","安心"], v:{watch:76,quick:44,attach:58,regular:62,observe:66,social:44,balance:90,continue:60}},
+      { id:8, type:"お世話職人タイプ", msg:"決まった世話をきちんと続ける力が出やすそうです。", tags:["規則性","職人"], v:{watch:62,quick:56,attach:54,regular:88,observe:58,social:32,balance:66,continue:70}},
+      { id:9, type:"観察して発見タイプ", msg:"形や反応の変化をじっくり確かめる関わり方が合いそうです。", tags:["発見","観察"], v:{watch:72,quick:46,attach:48,regular:66,observe:84,social:28,balance:70,continue:58}},
+      { id:10, type:"音を待つ見守りタイプ", msg:"すぐに答えを出さず、変化を待つ楽しみ方が合いそうです。", tags:["待つ","見守り"], v:{watch:84,quick:34,attach:52,regular:70,observe:78,social:34,balance:80,continue:64}},
+      { id:11, type:"反応チェックタイプ", msg:"ちょこちょこ様子を見て、反応を確かめる関わり方が合いそうです。", tags:["反応","かわいい"], v:{watch:58,quick:86,attach:78,regular:56,observe:70,social:72,balance:50,continue:70}},
+      { id:12, type:"やさしいお世話タイプ", msg:"穏やかに関わりながら、愛着を育てる相棒が合いそうです。", tags:["やさしさ","愛着"], v:{watch:72,quick:58,attach:82,regular:68,observe:62,social:64,balance:72,continue:78}},
+      { id:13, type:"ふわっと愛着タイプ", msg:"かわいさに心が動き、自然に会いに行きたくなりそうです。", tags:["愛着","ふわふわ"], v:{watch:62,quick:72,attach:90,regular:54,observe:58,social:78,balance:52,continue:78}},
+      { id:14, type:"声かけ交流タイプ", msg:"話しかけるように関わることで、関係が育ちそうです。", tags:["声かけ","交流"], v:{watch:56,quick:74,attach:76,regular:62,observe:64,social:88,balance:55,continue:74}},
+      { id:15, type:"にぎやか反応タイプ", msg:"返ってくる反応を楽しみながら続けられそうです。", tags:["反応","交流"], v:{watch:48,quick:84,attach:70,regular:58,observe:62,social:86,balance:48,continue:70}},
+      { id:16, type:"気まぐれ距離感タイプ", msg:"近づいたり離れたりしながら、自分らしい関係を作れそうです。", tags:["距離感","自由"], v:{watch:74,quick:56,attach:78,regular:40,observe:70,social:58,balance:86,continue:66}},
+      { id:17, type:"まっすぐ交流タイプ", msg:"会いに行く、反応する、また戻るという素直な関わり方が合いそうです。", tags:["交流","継続"], v:{watch:54,quick:82,attach:86,regular:64,observe:56,social:86,balance:48,continue:82}},
+      { id:18, type:"長く続く安定タイプ", msg:"ゆっくりでも長く関係を保つお世話が合いそうです。", tags:["継続","安定"], v:{watch:86,quick:26,attach:64,regular:86,observe:62,social:30,balance:88,continue:84}},
+      { id:19, type:"静かな観察タイプ", msg:"細かな反応や状態を見ながら、落ち着いて関われそうです。", tags:["観察","静か"], v:{watch:82,quick:40,attach:56,regular:70,observe:90,social:34,balance:82,continue:64}},
+      { id:20, type:"遊び好き交流タイプ", msg:"関わるほど反応が気になり、もう一度試したくなりそうです。", tags:["遊び","反応"], v:{watch:46,quick:84,attach:78,regular:48,observe:72,social:84,balance:46,continue:74}},
+      { id:21, type:"ていねい愛着タイプ", msg:"大事にしたい気持ちと観察する力の両方が出やすそうです。", tags:["愛着","ていねい"], v:{watch:74,quick:56,attach:86,regular:66,observe:76,social:58,balance:74,continue:82}},
+      { id:22, type:"並んで歩くタイプ", msg:"ほどよい距離で一緒にいるような関わり方が合いそうです。", tags:["距離感","一緒に"], v:{watch:70,quick:54,attach:72,regular:66,observe:60,social:68,balance:82,continue:76}},
+      { id:23, type:"のんびり安心タイプ", msg:"ゆったりしたテンポで、安心できる関係を作れそうです。", tags:["のんびり","安心"], v:{watch:82,quick:36,attach:78,regular:64,observe:58,social:48,balance:86,continue:74}},
+      { id:24, type:"反応キャッチタイプ", msg:"相棒の反応を受け取りながら、楽しく関係を広げられそうです。", tags:["反応","交流"], v:{watch:52,quick:78,attach:72,regular:54,observe:68,social:82,balance:58,continue:74}},
+      { id:25, type:"遊んで仲良くなるタイプ", msg:"やりとりを重ねるほど、相棒が身近になりそうです。", tags:["遊び","愛着"], v:{watch:50,quick:82,attach:82,regular:50,observe:70,social:86,balance:50,continue:78}},
+      { id:26, type:"かわいがり上手タイプ", msg:"愛着と観察のバランスで、相棒の魅力を見つけられそうです。", tags:["愛着","観察"], v:{watch:64,quick:70,attach:88,regular:58,observe:78,social:70,balance:64,continue:80}},
+      { id:27, type:"ゆるく続けるタイプ", msg:"力を入れすぎず、自然に戻ってこられる関係が合いそうです。", tags:["ゆるい継続","安心"], v:{watch:82,quick:34,attach:72,regular:54,observe:56,social:44,balance:90,continue:78}},
+      { id:28, type:"しっかり向き合うタイプ", msg:"存在感のある相棒と、堂々と関わる力が出やすそうです。", tags:["存在感","関係"], v:{watch:58,quick:66,attach:84,regular:58,observe:62,social:70,balance:62,continue:78}},
+      { id:29, type:"大きく見守るタイプ", msg:"すぐに動かず、広い気持ちで支えるお世話が合いそうです。", tags:["見守り","安定"], v:{watch:90,quick:24,attach:76,regular:74,observe:58,social:40,balance:88,continue:82}},
+      { id:30, type:"遠くまで見渡すタイプ", msg:"少し引いて観察し、全体の変化に気づけそうです。", tags:["観察","見渡す"], v:{watch:86,quick:34,attach:62,regular:66,observe:84,social:38,balance:86,continue:68}},
+      { id:31, type:"慎重だけど情深いタイプ", msg:"少しずつ近づきながら、関係を大切にできそうです。", tags:["慎重","愛着"], v:{watch:80,quick:42,attach:78,regular:68,observe:72,social:42,balance:84,continue:78}},
+      { id:32, type:"こまめな記録タイプ", msg:"変化を確かめながら、関わりの手がかりを集められそうです。", tags:["記録","観察"], v:{watch:72,quick:60,attach:64,regular:76,observe:88,social:48,balance:70,continue:72}},
+      { id:33, type:"小さな不思議タイプ", msg:"不思議な変化に気づき、もう少し見てみたくなりそうです。", tags:["不思議","観察"], v:{watch:78,quick:48,attach:70,regular:60,observe:90,social:46,balance:78,continue:72}},
+      { id:34, type:"静かな再会タイプ", msg:"派手ではなくても、戻ってきた感じを大切にできそうです。", tags:["再会","見守り"], v:{watch:84,quick:36,attach:68,regular:64,observe:76,social:36,balance:86,continue:76}},
+      { id:35, type:"変化に気づくタイプ", msg:"小さな違和感や変化を楽しみながら関われそうです。", tags:["変化","観察"], v:{watch:70,quick:60,attach:58,regular:56,observe:88,social:52,balance:72,continue:66}},
+      { id:36, type:"ほどよい距離タイプ", msg:"相棒のペースを尊重しながら、無理なく続けられそうです。", tags:["距離感","尊重"], v:{watch:84,quick:34,attach:56,regular:58,observe:68,social:30,balance:92,continue:62}},
+      { id:37, type:"毎日リズムタイプ", msg:"日課のように世話を続ける関わり方が合いそうです。", tags:["規則性","日課"], v:{watch:64,quick:58,attach:66,regular:92,observe:54,social:48,balance:64,continue:82}},
+      { id:38, type:"素朴に続けるタイプ", msg:"特別すぎない毎日の関わりを積み重ねられそうです。", tags:["素朴","継続"], v:{watch:76,quick:42,attach:66,regular:80,observe:56,social:42,balance:82,continue:80}},
+      { id:39, type:"世話焼きタイプ", msg:"つい気になって、何かしてあげたくなる関わり方が合いそうです。", tags:["世話焼き","反応"], v:{watch:54,quick:78,attach:80,regular:68,observe:58,social:74,balance:50,continue:76}},
+      { id:40, type:"ふんわり見守りタイプ", msg:"やさしく見守りながら、少しずつ愛着を育てられそうです。", tags:["見守り","ふんわり"], v:{watch:82,quick:38,attach:74,regular:66,observe:56,social:46,balance:86,continue:74}},
+      { id:41, type:"穏やか交流タイプ", msg:"落ち着いたやりとりの中で、関係が育ちそうです。", tags:["穏やか","交流"], v:{watch:72,quick:52,attach:78,regular:64,observe:62,social:68,balance:78,continue:76}},
+      { id:42, type:"気づいたら会いに行くタイプ", msg:"小さく素早い変化に反応しながら関われそうです。", tags:["素早い","会いに行く"], v:{watch:52,quick:88,attach:68,regular:58,observe:72,social:76,balance:46,continue:72}},
+      { id:43, type:"静かな知恵タイプ", msg:"相棒をよく見て、落ち着いて判断する関わり方が合いそうです。", tags:["観察","判断"], v:{watch:88,quick:32,attach:54,regular:62,observe:92,social:34,balance:86,continue:60}},
+      { id:44, type:"愛着たっぷりタイプ", msg:"かわいさや安心感から、自然に関係が深まりそうです。", tags:["愛着","安心"], v:{watch:70,quick:58,attach:92,regular:54,observe:64,social:72,balance:70,continue:82}},
+      { id:45, type:"大らか見守りタイプ", msg:"多少の変化も受け止めながら、関係を続けられそうです。", tags:["大らか","継続"], v:{watch:86,quick:30,attach:76,regular:62,observe:56,social:42,balance:88,continue:80}},
+      { id:46, type:"絆を確かめるタイプ", msg:"距離を保ちつつ、深い関係を大切にできそうです。", tags:["絆","距離感"], v:{watch:78,quick:44,attach:84,regular:56,observe:70,social:54,balance:88,continue:78}},
+      { id:47, type:"ゆったり愛着タイプ", msg:"急がず、安心できる距離で愛着を育てられそうです。", tags:["ゆったり","愛着"], v:{watch:82,quick:34,attach:86,regular:58,observe:58,social:54,balance:88,continue:78}},
+      { id:48, type:"大切に抱えるタイプ", msg:"相棒を特別な存在として、大事に関わる傾向が出そうです。", tags:["特別感","愛着"], v:{watch:68,quick:58,attach:94,regular:64,observe:62,social:70,balance:72,continue:84}},
+      { id:49, type:"変化を楽しむタイプ", msg:"状況に合わせて、関わり方を変える柔軟さが活きそうです。", tags:["変化","柔軟"], v:{watch:62,quick:68,attach:60,regular:44,observe:88,social:58,balance:78,continue:62}},
+      { id:50, type:"無理なく続くタイプ", msg:"がんばりすぎず、でも関係を切らさない関わり方が合いそうです。", tags:["無理なく","継続"], v:{watch:88,quick:24,attach:70,regular:52,observe:54,social:34,balance:92,continue:76}}
+    ];
+
+    const state = {
+      page: 0,
+      result: null,
+      submitted: false,
+      startedAt: new Date().toISOString()
+    };
+
+    function qs(name){
+      return new URLSearchParams(location.search).get(name) || "";
+    }
+
+    function getCarryOver(){
+      const keys = ["research_id","condition_id","character_id","language","screen_id","day"];
+      const out = {};
+      keys.forEach(k => {
+        out[k] = qs(k) || localStorage.getItem(k) || "";
+      });
+      if(!out.language) out.language = "ja";
+      return out;
+    }
+
+    const carry = getCarryOver();
+
+    function makeAutoId(){
+      const d = new Date();
+      const ymd = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
+      const rnd = Math.random().toString(36).slice(2,8).toUpperCase();
+      return `AUTO-${ymd}-${rnd}`;
+    }
+
+    function renderScaleQuestion(q, group){
+      const div = document.createElement("div");
+      div.className = "q";
+      div.innerHTML = `
+        <div class="q-title">${escapeHtml(q.text)}</div>
+        <div class="scale" role="radiogroup" aria-label="${escapeHtml(q.text)}">
+          ${[1,2,3,4,5].map(n => `
+            <span>
+              <input type="radio" id="${q.id}_${n}" name="${q.id}" value="${n}" data-group="${group}" required>
+              <label for="${q.id}_${n}">${n}</label>
+            </span>
+          `).join("")}
+        </div>
+        <div class="scale-word"><span>あてはまらない</span><span>どちらともいえない</span><span>あてはまる</span></div>
+      `;
+      return div;
+    }
+
+    function escapeHtml(str){
+      return String(str).replace(/[&<>'"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[ch]));
+    }
+
+    function init(){
+      document.getElementById("research_id").value = carry.research_id || makeAutoId();
+      const idBox = document.getElementById("identityQuestions");
+      IDENTITY_QUESTIONS.forEach(q => idBox.appendChild(renderScaleQuestion(q,"identity")));
+      const careBox = document.getElementById("careQuestions");
+      CARE_QUESTIONS.forEach(q => careBox.appendChild(renderScaleQuestion(q,"care")));
+      document.querySelectorAll("[data-next]").forEach(btn => btn.addEventListener("click", nextPage));
+      document.querySelectorAll("[data-prev]").forEach(btn => btn.addEventListener("click", prevPage));
+      document.querySelector("[data-show-result]").addEventListener("click", showResult);
+      document.getElementById("surveyForm").addEventListener("submit", submitSurvey);
+      updatePage();
+    }
+
+    function validatePage(page){
+      const pageEl = document.querySelector(`.page[data-page="${page}"]`);
+      const requiredNames = [...new Set([...pageEl.querySelectorAll("input[required]")].map(i => i.name))];
+      for(const name of requiredNames){
+        if(!document.querySelector(`input[name="${CSS.escape(name)}"]:checked`)){
+          alert("未回答の項目があります。近いものを選んでください。");
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function nextPage(){
+      if(!validatePage(state.page)) return;
+      state.page = Math.min(3, state.page + 1);
+      updatePage();
+    }
+
+    function prevPage(){
+      state.page = Math.max(0, state.page - 1);
+      updatePage();
+    }
+
+    function updatePage(){
+      document.querySelectorAll(".page").forEach(p => p.classList.toggle("hidden", Number(p.dataset.page) !== state.page));
+      document.querySelectorAll(".dot").forEach(d => d.classList.toggle("active", Number(d.dataset.dot) <= state.page));
+      scrollTo({top:0, behavior:"smooth"});
+    }
+
+    function getAnswer(id){
+      const el = document.querySelector(`input[name="${CSS.escape(id)}"]:checked`);
+      return el ? Number(el.value) : null;
+    }
+
+    function getAllAnswers(){
+      const answers = {};
+      IDENTITY_QUESTIONS.concat(CARE_QUESTIONS).forEach(q => answers[q.id] = getAnswer(q.id));
+      answers.free_note_before = document.getElementById("free_note_before").value.trim();
+      answers.free_note_after = document.getElementById("free_note_after").value.trim();
+      return answers;
+    }
+
+    function normalizeLikert(n){
+      return Math.round(((Number(n) || 3) - 1) / 4 * 100);
+    }
+
+    function computeScores(){
+      const scores = {};
+      AXES.forEach(axis => {
+        const items = CARE_QUESTIONS.filter(q => q.axis === axis.key);
+        const vals = items.map(q => normalizeLikert(getAnswer(q.id)));
+        scores[axis.key] = Math.round(vals.reduce((a,b)=>a+b,0) / vals.length);
+      });
+
+      const identityVals = IDENTITY_QUESTIONS.map(q => {
+        const raw = getAnswer(q.id);
+        const v = q.reverse ? 6 - raw : raw;
+        return normalizeLikert(v);
+      });
+      scores.identity_continuity = Math.round(identityVals.reduce((a,b)=>a+b,0) / identityVals.length);
+
+      const logBoost = getLogBoost();
+      Object.keys(logBoost).forEach(k => {
+        if(scores[k] !== undefined){
+          scores[k] = clamp(Math.round(scores[k] * .82 + logBoost[k] * .18), 0, 100);
+        }
+      });
+      return scores;
+    }
+
+    function getLogBoost(){
+      try{
+        const raw = localStorage.getItem("care_profile_hint");
+        if(raw){
+          const parsed = JSON.parse(raw);
+          return parsed || {};
+        }
+      }catch(e){}
+      return {};
+    }
+
+    function clamp(n,min,max){return Math.max(min, Math.min(max,n));}
+
+    function selectPartner(scores){
+      const withDistance = PET_ARCHETYPES.map(p => {
+        let dist = 0;
+        AXES.forEach(axis => {
+          const d = (scores[axis.key] ?? 50) - p.v[axis.key];
+          dist += d * d;
+        });
+        return { ...p, distance: Math.sqrt(dist) };
+      }).sort((a,b)=>a.distance-b.distance);
+      return withDistance[0];
+    }
+
+    function petList(){
+      return (typeof PET_SILHOUETTES !== "undefined") ? PET_SILHOUETTES : [];
+    }
+
+    function getImageForPet(id){
+      const row = petList().find(p => Number(p.id) === Number(id));
+      return row ? `./assets/pets/${row.file}` : "";
+    }
+
+    function showResult(){
+      if(!validatePage(state.page)) return;
+      const scores = computeScores();
+      const partner = selectPartner(scores);
+      state.result = { scores, partner };
+
+      document.getElementById("petImage").src = getImageForPet(partner.id);
+      document.getElementById("petName").textContent = partnerName(partner.id);
+      document.getElementById("petType").textContent = partner.type;
+      document.getElementById("resultMessage").textContent = partner.msg;
+      document.getElementById("resultSub").textContent = makeResultSub(scores);
+      document.getElementById("resultChips").innerHTML = partner.tags.map(t => `<span class="chip">${escapeHtml(t)}</span>`).join("");
+      renderBars(scores);
+
+      state.page = 3;
+      updatePage();
+    }
+
+    function partnerName(id){
+      const row = petList().find(p => Number(p.id) === Number(id));
+      return row ? row.name : "相棒";
+    }
+
+    function makeResultSub(scores){
+      const top = AXES.slice().sort((a,b)=>scores[b.key]-scores[a.key]).slice(0,2).map(a=>a.label);
+      return `特に「${top.join("」と「")}」が高めに出ています。相棒との関係を、急いで決めつけずに育てていくタイプかもしれません。`;
+    }
+
+    function renderBars(scores){
+      const box = document.getElementById("profileBars");
+      box.innerHTML = `<h3 class="section-title" style="font-size:18px;margin-top:18px;">お世話プロフィール</h3>` + AXES.map(axis => `
+        <div class="bar-row">
+          <div class="bar-label">${axis.label}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${scores[axis.key]}%"></div></div>
+          <div class="bar-num">${scores[axis.key]}%</div>
+        </div>
+      `).join("");
+    }
+
+    function buildPayload(){
+      if(!state.result){
+        const scores = computeScores();
+        state.result = { scores, partner: selectPartner(scores) };
+      }
+      const rid = document.getElementById("research_id").value.trim() || makeAutoId();
+      localStorage.setItem("research_id", rid);
+      return {
+        received_at: new Date().toISOString(),
+        timestamp: new Date().toISOString(),
+        research_id: rid,
+        condition_id: carry.condition_id || qs("condition") || "",
+        character_id: carry.character_id || "",
+        language: carry.language || "ja",
+        screen_id: "after_survey",
+        day: carry.day || "after_game",
+        event_type: "survey_submit",
+        app_version: CONFIG.APP_VERSION,
+        user_agent: navigator.userAgent,
+        started_at: state.startedAt,
+        answers: getAllAnswers(),
+        axis_scores: state.result.scores,
+        partner: {
+          id: state.result.partner.id,
+          name: partnerName(state.result.partner.id),
+          type: state.result.partner.type,
+          file: petList().find(p => Number(p.id) === Number(state.result.partner.id))?.file || ""
+        }
+      };
+    }
+
+    async function submitSurvey(e){
+      e.preventDefault();
+      if(!validatePage(3)) return;
+      const btn = document.getElementById("submitBtn");
+      const status = document.getElementById("submitStatus");
+      const payload = buildPayload();
+      btn.disabled = true;
+      btn.textContent = "送信中です";
+      status.innerHTML = "";
+
+      if(!CONFIG.GAS_ENDPOINT){
+        saveLocalBackup(payload);
+        status.innerHTML = `<div class="download-box">送信先URLが未設定のため、回答データを端末内で控えとして保存しました。公開前に index.html の GAS_ENDPOINT を設定してください。</div>`;
+        btn.textContent = "控えを保存しました";
+        state.submitted = true;
+        return;
+      }
+
+      try{
+        const res = await fetch(CONFIG.GAS_ENDPOINT, {
+          method:"POST",
+          mode:"no-cors",
+          headers:{"Content-Type":"text/plain;charset=utf-8"},
+          body: JSON.stringify(payload)
+        });
+        localStorage.setItem("last_survey_payload", JSON.stringify(payload));
+        status.innerHTML = `<div class="complete-box">送信しました。ご協力ありがとうございました。</div>`;
+        btn.textContent = "送信済み";
+        state.submitted = true;
+      }catch(err){
+        saveLocalBackup(payload);
+        status.innerHTML = `<div class="error-box">送信できませんでした。通信環境を確認してください。回答の控えは端末内に保存しました。</div>`;
+        btn.disabled = false;
+        btn.textContent = "もう一度送信する";
+      }
+    }
+
+    function saveLocalBackup(payload){
+      localStorage.setItem("last_survey_payload", JSON.stringify(payload));
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `care_survey_${payload.research_id}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    init();
+  </script>
+</body>
+</html>
